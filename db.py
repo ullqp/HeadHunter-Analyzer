@@ -1,4 +1,4 @@
-﻿import psycopg2
+import psycopg2
 from typing import List, Tuple, Optional, Dict, Any
 
 
@@ -17,17 +17,52 @@ class DBManager:
             port: Порт подключения
             db_name: Название базы данных
         """
-        self.conn = psycopg2.connect(
-            dbname=db_name, 
-            user=user, 
-            password=password, 
-            host=host, 
-            port=port
-        )
-        self.cur = self.conn.cursor()
+        
+        self.db_info = {
+            "host": host,
+            "user": user,
+            "password": password,
+            "port": port,
+            "db_name": db_name
+        }
+        
+        self.create_database(self.db_info["db_name"])
+        self.connect()
         
         self.create_employers_table()
         self.create_vacancies_table()
+
+    def connect(self) -> None:
+        self.conn = psycopg2.connect(
+            dbname=self.db_info["db_name"], 
+            user=self.db_info["user"], 
+            password=self.db_info["password"], 
+            host=self.db_info["host"], 
+            port=self.db_info["port"]
+        )
+        self.cur = self.conn.cursor()
+
+    def create_database(self, db_name: str) -> None:
+        """
+        Создание новой базы данных.
+        
+        Параметры:
+            db_name: Название базы данных
+        """
+        conn = psycopg2.connect(
+            dbname="postgres",
+            user=self.conn.info.user,
+            password=self.conn.info.password,
+            host=self.conn.info.host,
+            port=self.conn.info.port
+        )
+        cur = conn.cursor()
+        
+        cur.execute(f"CREATE DATABASE {db_name}")
+        conn.commit()
+        
+        cur.close()
+        conn.close()
 
     def create_employers_table(self) -> None:
         """Создание таблицы работодателей, если она не существует."""
