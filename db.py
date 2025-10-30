@@ -33,6 +33,8 @@ class DBManager:
         self.create_vacancies_table()
 
     def connect(self) -> None:
+        """Подключение к базе данных"""
+        
         self.conn = psycopg2.connect(
             dbname=self.db_info["db_name"], 
             user=self.db_info["user"], 
@@ -237,3 +239,4 @@ class DBManager:
     def __exit__(self) -> None:
         """Закрытие соединения при выходе."""
         self.close_connection()
+
